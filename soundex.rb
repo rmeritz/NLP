@@ -7,13 +7,15 @@
 ### Produces a four-character strings composed.
 ### A single letter followed by three numbers.
 
+#### Jurafsky | Jarofsky | Jarovsky | Jarovski -> J612
+
 require 'rubygems'
 
 name = ARGV.first
 
 first_letter=name[0,1].capitalize
 
-rest=name[1..-1].delete "ehiouwy"
+rest=name[1..-1].delete "aehiouwy"
 
 rest.gsub!(/[bfpv]/, '1')
 rest.gsub!(/[cgjkqsxz]/, '2')
@@ -22,6 +24,8 @@ rest.gsub!(/[l]/, '4')
 rest.gsub!(/[mn]/, '5')
 rest.gsub!(/[r]/, '6')
 
-puts 
+puts first_letter + rest.squeeze[0..2].ljust(3, '0')
+
+
  
 
