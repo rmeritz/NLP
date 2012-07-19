@@ -17,17 +17,15 @@ m=input_word.
 
 puts m
 
-steps_1a=Array.[ /sses$/, 'ss',
-                 /ies$/, 'i',
-                 /ss$/, 'ss',
-                 /s$/, '']
+steps_1a=[ /sses$/, 'ss',
+           /ies$/, 'i',
+           /ss$/, 'ss',
+           /s$/, '']
  
 puts steps_1a
 
-puts maybe_apply_next_step(steps, input_word)
-
 def maybe_apply_next_step(steps, word)
-  if step.empty?
+  if steps.empty?
     word
   else if steps.fetch(0) =~ word
          word.gsub(steps.fetch(0), steps.fetch(1))
@@ -36,3 +34,5 @@ def maybe_apply_next_step(steps, word)
        end
   end
 end
+
+puts maybe_apply_next_step(steps_1a, input_word)
