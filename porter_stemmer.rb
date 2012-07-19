@@ -17,9 +17,22 @@ m=input_word.
 
 puts m
 
-stem_1a=input_word.
-  gsub(/sses$/, 'ss').
-  gsub(/ies$/, 'i').
-  gsub(/([^s])s$/, '\1')
+steps_1a=Array.[ /sses$/, 'ss',
+                 /ies$/, 'i',
+                 /ss$/, 'ss',
+                 /s$/, '']
+ 
+puts steps_1a
 
-puts stem_1a
+puts maybe_apply_next_step(steps, input_word)
+
+def maybe_apply_next_step(steps, word)
+  if step.empty?
+    word
+  else if steps.fetch(0) =~ word
+         word.gsub(steps.fetch(0), steps.fetch(1))
+       else
+         maybe_apply_next_step(steps, word)
+       end
+  end
+end
