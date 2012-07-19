@@ -16,3 +16,10 @@ m=input_word.
   length/2
 
 puts m
+
+stem_1a=input_word.
+  gsub(/sses$/, 'ss').
+  gsub(/ies$/, 'i').
+  gsub(/([^s])s$/, '\1')
+
+puts stem_1a
