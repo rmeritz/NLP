@@ -127,13 +127,16 @@ def porter_stem(word)
            simple_m_subsitute_step(/ness$/, '', 0),
           ]
 
-  [ steps1a,
-    steps1b,
-    steps1c,
-    steps2,
-    steps3].inject(word) { | word , steps |
+  all_steps=[ steps1a,
+              steps1b,
+              steps1c,
+              steps2,
+              steps3
+            ]
+  
+  all_steps.inject(word) { | word , steps |
     maybe_apply_next_step(steps, word) }
-
+  
 end
 
 puts porter_stem(input_word)
