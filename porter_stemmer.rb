@@ -88,7 +88,11 @@ def porter_stem(word)
            step1b_step(/ing$/)
           ]
 
-  [steps1a, steps1b].inject(word) { | word , steps |
+  steps1c=[[ lambda { | word | contains_vowel(word.chomp('y')) },
+             lambda { | word | word.gsub(/y$/, 'i') }]
+          ]
+
+  [steps1a, steps1b, steps1c].inject(word) { | word , steps |
     maybe_apply_next_step(steps, word) }
 end
 
