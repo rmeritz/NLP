@@ -86,12 +86,10 @@ def porter_stem(word)
             simple_subsitute_step(/ss$/, 'ss'),
             simple_subsitute_step(/s$/, '')
           ]
-  
-  steps1b=[[ lambda { | word | m(word, /eed$/) > 0 and 
-               /eed$/ =~ word },
-             lambda { | word | word.gsub(/eed$/, 'ee')}],
-           step1b_step(/ed$/),
-           step1b_step(/ing$/)
+
+  steps1b=[ simple_m_subsitute_step(/eed$/, 'ee', 0),
+            step1b_step(/ed$/),
+            step1b_step(/ing$/)
           ]
 
   steps1c=[[ lambda { | word | contains_vowel(word.chomp('y')) },
