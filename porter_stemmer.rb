@@ -17,20 +17,27 @@ m=input_word.
 
 puts m
 
-steps_1a=[ /sses$/, 'ss',
-           /ies$/, 'i',
-           /ss$/, 'ss',
-           /s$/, '']
+def simple_subsitute_step(pattern, replacement)
+  [ lambda { | word | pattern =~ word },
+    lambda { | word | word.gsub(pattern, replacement) }
+  ]
+end
+
+steps_1a=[ simple_subsitute_step(/sses$/, 'ss'),
+           simple_subsitute_step(/ies$/, 'i'),
+           simple_subsitute_step(/ss$/, 'ss'),
+           simple_subsitute_step(/s$/, ''),
+         ]
  
 puts steps_1a
 
 def maybe_apply_next_step(steps, word)
   if steps.empty?
     word
-  else if steps.fetch(0) =~ word
-         word.gsub(steps.first, steps.fetch(1))
+  else if steps.first.first.call(word)
+         steps.first.last.call(word)
        else
-         maybe_apply_next_step(steps.drop(2), word)
+         maybe_apply_next_step(steps.drop(1), word)
        end
   end
 end
