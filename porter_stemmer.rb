@@ -28,9 +28,9 @@ def maybe_apply_next_step(steps, word)
   if steps.empty?
     word
   else if steps.fetch(0) =~ word
-         word.gsub(steps.fetch(0), steps.fetch(1))
+         word.gsub(steps.first, steps.fetch(1))
        else
-         maybe_apply_next_step(steps, word)
+         maybe_apply_next_step(steps.drop(2), word)
        end
   end
 end
