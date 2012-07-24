@@ -5,7 +5,8 @@
 
 input_word = ARGV.first.downcase
 
-m=input_word.
+def m(word)
+  word.
   gsub(/[^aeiouy]/, 'C').
   gsub(/[aeiou]/, 'V').
   gsub(/Cy/, 'CV').
@@ -14,22 +15,13 @@ m=input_word.
   gsub(/^C/, '').
   gsub(/V$/, '').
   length/2
-
-puts m
+end
 
 def simple_subsitute_step(pattern, replacement)
   [ lambda { | word | pattern =~ word },
     lambda { | word | word.gsub(pattern, replacement) }
   ]
 end
-
-steps_1a=[ simple_subsitute_step(/sses$/, 'ss'),
-           simple_subsitute_step(/ies$/, 'i'),
-           simple_subsitute_step(/ss$/, 'ss'),
-           simple_subsitute_step(/s$/, ''),
-         ]
- 
-puts steps_1a
 
 def maybe_apply_next_step(steps, word)
   if steps.empty?
@@ -41,5 +33,11 @@ def maybe_apply_next_step(steps, word)
        end
   end
 end
+
+steps_1a=[ simple_subsitute_step(/sses$/, 'ss'),
+           simple_subsitute_step(/ies$/, 'i'),
+           simple_subsitute_step(/ss$/, 'ss'),
+           simple_subsitute_step(/s$/, ''),
+         ]
 
 puts maybe_apply_next_step(steps_1a, input_word)
