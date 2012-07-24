@@ -57,32 +57,36 @@ end
 
 def step1b_step(regex)
 
-steps1b_ext=[ simple_subsitute_step(/at$/, 'ate'),
-              simple_subsitute_step(/bl$/, 'ble'),
-              simple_subsitute_step(/iz$/, 'ize'),
-              [ lambda { | word | ends_with_double_consonant(word) and
-                  /[^lsz]/ =~ word },
-                lambda { | word | word.chop }]
-            ]
-
-  [ lambda { | word | contains_vowel(word) and regex =~ word },
+  steps1b_ext=[ simple_subsitute_step(/at$/, 'ate'),
+                simple_subsitute_step(/bl$/, 'ble'),
+                simple_subsitute_step(/iz$/, 'ize'),
+                [ lambda { | word | ends_with_double_consonant(word) and
+                    /[^lsz]$/ =~ word },
+                  lambda { | word | word.chop }],
+                [ lambda { | word | m(word) == 1 and o_star_rule(word) },
+                  lambda { | word | word+'e' }]
+              ]
+  
+  [ lambda { | word | contains_vowel(word.gsub(regex, '')) and
+      regex =~ word },
     lambda { | word | maybe_apply_next_step(steps1b_ext,
                                             word.gsub(regex, ''))}]
 end
 
 def porter_stem(word)
 
-steps1a=[ simple_subsitute_step(/sses$/, 'ss'),
-          simple_subsitute_step(/ies$/, 'i'),
-          simple_subsitute_step(/ss$/, 'ss'),
-          simple_subsitute_step(/s$/, ''),
-         ]
-
-steps1b=[[ lambda { | word | m(word) > 1 and  /eed$/ =~ word },
-           lambda { | word | word.gsub(/eed$/, 'ee')}],
-         step1b_step(/ed$/),
-         step1b_step(/ing$/)
-        ]
+  steps1a=[ simple_subsitute_step(/sses$/, 'ss'),
+            simple_subsitute_step(/ies$/, 'i'),
+            simple_subsitute_step(/ss$/, 'ss'),
+            simple_subsitute_step(/s$/, '')
+          ]
+  
+  steps1b=[[ lambda { | word | m(word.gsub(/eed$/, 'ee')) > 0 and 
+               /eed$/ =~ word },
+             lambda { | word | word.gsub(/eed$/, 'ee')}],
+           step1b_step(/ed$/),
+           step1b_step(/ing$/)
+          ]
 
   [steps1a, steps1b].inject(word) { | word , steps |
     maybe_apply_next_step(steps, word) }
