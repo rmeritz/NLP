@@ -12,35 +12,40 @@ def cv(word)
     gsub(/y/, 'C')
 end
 
-puts cv(input_word)
-
-def m(word)
+def measure(word)
   cv(word).squeeze.gsub(/^C/, '').gsub(/V$/, '').length/2
-end
+end  
 
-puts m(input_word)
+def m(word, pattern)
+  measure(word.gsub(pattern, ''))
+end
 
 def contains_vowel(stem)
   /V/ =~ cv(stem)
 end
 
-puts contains_vowel(input_word)
-
 def ends_with_double_consonant(stem)
   /CC$/ =~ cv(stem)
 end
-
-puts ends_with_double_consonant(input_word)
 
 def o_star_rule(stem)
   /CVC$/ =~ cv(stem) and /[^wxy]$/ =~ stem
 end
 
-puts o_star_rule(input_word)
+def lambda_subsitute(pattern, replacement)
+  lambda { | word | word.gsub(pattern, replacement) }
+end
 
 def simple_subsitute_step(pattern, replacement)
   [ lambda { | word | pattern =~ word },
-    lambda { | word | word.gsub(pattern, replacement) }
+    lambda_subsitute(pattern, replacement)
+  ]
+end
+
+def simple_m_subsitute_step(pattern, replacement, m)
+  [ lambda { | word |
+      m(word, pattern) > m and pattern =~ word },
+  lambda_subsitute(pattern, replacement)
   ]
 end
 
@@ -63,7 +68,8 @@ def step1b_step(regex)
                 [ lambda { | word | ends_with_double_consonant(word) and
                     /[^lsz]$/ =~ word },
                   lambda { | word | word.chop }],
-                [ lambda { | word | m(word) == 1 and o_star_rule(word) },
+                [ lambda { | word | measure(word) == 1 and
+                    o_star_rule(word) },
                   lambda { | word | word+'e' }]
               ]
   
@@ -81,7 +87,7 @@ def porter_stem(word)
             simple_subsitute_step(/s$/, '')
           ]
   
-  steps1b=[[ lambda { | word | m(word.gsub(/eed$/, 'ee')) > 0 and 
+  steps1b=[[ lambda { | word | m(word, /eed$/) > 0 and 
                /eed$/ =~ word },
              lambda { | word | word.gsub(/eed$/, 'ee')}],
            step1b_step(/ed$/),
@@ -92,8 +98,44 @@ def porter_stem(word)
              lambda { | word | word.gsub(/y$/, 'i') }]
           ]
 
-  [steps1a, steps1b, steps1c].inject(word) { | word , steps |
+  steps2=[ simple_m_subsitute_step(/ational$/, 'ate', 0),
+           simple_m_subsitute_step(/tional$/, 'tion', 0),
+           simple_m_subsitute_step(/enci$/, 'ence', 0),
+           simple_m_subsitute_step(/anci$/, 'ance', 0),
+           simple_m_subsitute_step(/izer$/, 'ize', 0),
+           simple_m_subsitute_step(/abli$/, 'able', 0),
+           simple_m_subsitute_step(/alli$/, 'al', 0),
+           simple_m_subsitute_step(/entli$/, 'ent', 0),
+           simple_m_subsitute_step(/eli$/, 'e', 0),
+           simple_m_subsitute_step(/ousli$/, 'ous', 0),
+           simple_m_subsitute_step(/ization$/, 'ize', 0),
+           simple_m_subsitute_step(/ation$/, 'ate', 0),
+           simple_m_subsitute_step(/ator$/, 'ate', 0),
+           simple_m_subsitute_step(/alism$/, 'al', 0),
+           simple_m_subsitute_step(/iveness$/, 'ive', 0),
+           simple_m_subsitute_step(/fulness$/, 'ful', 0),
+           simple_m_subsitute_step(/ousness$/, 'ous', 0),
+           simple_m_subsitute_step(/aliti$/, 'al', 0),
+           simple_m_subsitute_step(/iviti$/, 'ive', 0),
+           simple_m_subsitute_step(/biliti/, 'ble', 0)
+         ]
+
+  steps3=[ simple_m_subsitute_step(/icate$/, 'ic', 0),
+           simple_m_subsitute_step(/ative$/, '', 0),
+           simple_m_subsitute_step(/alize$/, 'al', 0),
+           simple_m_subsitute_step(/iciti$/, 'ic', 0),
+           simple_m_subsitute_step(/ical$/, 'ic', 0),
+           simple_m_subsitute_step(/ful$/, '', 0),
+           simple_m_subsitute_step(/ness$/, '', 0),
+          ]
+
+  [ steps1a,
+    steps1b,
+    steps1c,
+    steps2,
+    steps3].inject(word) { | word , steps |
     maybe_apply_next_step(steps, word) }
+
 end
 
 puts porter_stem(input_word)
