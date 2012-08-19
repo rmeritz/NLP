@@ -14,7 +14,7 @@ end
 
 def measure(word)
   cv(word).squeeze.gsub(/^C/, '').gsub(/V$/, '').length/2
-end  
+end
 
 def m(word, pattern)
   measure(word.gsub(pattern, ''))
@@ -34,6 +34,10 @@ end
 
 def lambda_subsitute(pattern, replacement)
   lambda { | word | word.gsub(pattern, replacement) }
+end
+
+def lambda_single_letter
+  lambda { | word | word.chop }
 end
 
 def simple_subsitute_step(pattern, replacement)
@@ -67,12 +71,12 @@ def step1b_step(regex)
                 simple_subsitute_step(/iz$/, 'ize'),
                 [ lambda { | word | ends_with_double_consonant(word) and
                     /[^lsz]$/ =~ word },
-                  lambda { | word | word.chop }],
+                  lambda_single_letter],
                 [ lambda { | word | measure(word) == 1 and
                     o_star_rule(word) },
                   lambda { | word | word+'e' }]
               ]
-  
+
   [ lambda { | word | contains_vowel(word.gsub(regex, '')) and
       regex =~ word },
     lambda { | word | maybe_apply_next_step(steps1b_ext,
@@ -127,16 +131,54 @@ def porter_stem(word)
            simple_m_subsitute_step(/ness$/, '', 0),
           ]
 
+  steps4=[ simple_m_subsitute_step(/al$/, '', 1),
+           simple_m_subsitute_step(/ance$/, '', 1),
+           simple_m_subsitute_step(/ence$/, '', 1),
+           simple_m_subsitute_step(/er$/, '', 1),
+           simple_m_subsitute_step(/ic$/, '', 1),
+           simple_m_subsitute_step(/able$/, '', 1),
+           simple_m_subsitute_step(/ible$/, '', 1),
+           simple_m_subsitute_step(/ant$/, '', 1),
+           simple_m_subsitute_step(/ement$/, '', 1),
+           simple_m_subsitute_step(/ment$/, '', 1),
+           simple_m_subsitute_step(/ent$/, '', 1),
+           [ lambda { | word | m(word, /ion$/) > 1 and
+               word =~ /[st]ion$/ },
+             lambda_subsitute(/ion$/, '')],
+           simple_m_subsitute_step(/ou$/, '', 1),
+           simple_m_subsitute_step(/ism$/, '', 1),
+           simple_m_subsitute_step(/ate$/, '', 1),
+           simple_m_subsitute_step(/iti$/, '', 1),
+           simple_m_subsitute_step(/ous$/, '', 1),
+           simple_m_subsitute_step(/ive$/, '', 1),
+           simple_m_subsitute_step(/ize$/, '', 1)
+         ]
+
+  steps5a=[ simple_m_subsitute_step(/e$/, '', 1),
+            [ lambda { | word | /e$/ =~ word and
+                measure(word.chomp('e')) == 1 and
+                not o_star_rule(word.chomp('e')) },
+              lambda_subsitute(/e$/, '')]
+          ]
+
+  steps5b=[ [ lambda { | word | /ll$/ =~ word and
+              measure(word.chomp('l')) > 1 },
+              lambda_subsitute(/ll$/, 'l')]
+          ]
+
   all_steps=[ steps1a,
               steps1b,
               steps1c,
               steps2,
-              steps3
+              steps3,
+              steps4,
+              steps5a,
+              steps5b
             ]
-  
+
   all_steps.inject(word) { | word , steps |
     maybe_apply_next_step(steps, word) }
-  
+
 end
 
 puts porter_stem(input_word)
