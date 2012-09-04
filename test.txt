@@ -1,0 +1,3 @@
+This is a plain text file. I'm trying to test my ngram script. I hope I can read this file.
+
+I hope I can read the second line of this file too.
