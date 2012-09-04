@@ -19,14 +19,13 @@
 # end
 
 class Corpus
+
+  attr_reader :file, :tokens
+
   def initialize(file)
     @file = file
     @file_contents = File.read(@file)
-    puts @file_contents.class
     @tokens = @file_contents.split(/\s=+/)
-  end
-  def tokens
-    @tokens
   end
   # def count(gram)
     
@@ -61,8 +60,8 @@ source = ARGV[0]
 
 # puts probablity.simple_unsmoothed
 
-puts source
-
 corpus = Corpus.new(source)
 
+puts corpus.file
 puts corpus.tokens
+puts corpus.tokens.class
