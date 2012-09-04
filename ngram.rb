@@ -3,25 +3,28 @@
 
 ## N-Grams
 
-# class Gram
-#   def initalize(gram)
-#     @tokens = gram.tokenize
-#   end
-#   def n
-#     @tokens.count
-#   end
-#   def word
-#     @tokens.take(1)
-#   end
-#   def history
-#     @tokens.drop(1)
-#   end
-# end
+class Gram
+
+  attr_reader :tokens
+  
+  def initialize(gram)
+    @tokens = gram
+  end
+  def n
+    @tokens.length
+  end
+  def word
+    @tokens.take(1)
+  end
+  def history
+    @tokens.drop(1)
+  end
+end
 
 class Corpus
 
   attr_reader :file, :tokens
-
+  
   def initialize(file)
     @file = file
     @file_contents = File.read(@file)
@@ -43,25 +46,30 @@ class Corpus
 end
 
 
-# class Probablity
-#   def initalize(source, gram)
-#     @corpus = Corpus.new(source)
-#     @gram = Gram.new(gram)
-#   end
+class Probablity
+  
+  attr_reader :corpus, :gram
+  
+  def initialize(source, gram)
+    @corpus = Corpus.new(source)
+    @gram = Gram.new(gram)
+  end
 #   def simple_unsmoothed
 #     @corpus.count(@gram)/@corpus.count(@gram.word)
 #  end
-# end
+end
 
-source = ARGV[0]
-# gram = ARGV[1]
+input_file = ARGV[0]
+input_gram = ARGV[1..-1]
 
-# probablity = Probablity.new(source, gram)
+probablity = Probablity.new(input_file, input_gram)
 
 # puts probablity.simple_unsmoothed
 
-corpus = Corpus.new(source)
-
-puts corpus.file
-puts corpus.tokens
-puts corpus.tokens.class
+puts probablity
+puts probablity.gram
+puts probablity.gram.tokens
+puts probablity.gram.tokens.class
+puts probablity.gram.n
+puts probablity.gram.word.class
+puts probablity.gram.history.class
