@@ -21,7 +21,9 @@
 class Corpus
   def initialize(file)
     @file = file
-    @tokens = File.read(@file)
+    @file_contents = File.read(@file)
+    puts @file_contents.class
+    @tokens = @file_contents.split(/\s=+/)
   end
   def tokens
     @tokens
@@ -30,7 +32,6 @@ class Corpus
     
   # end
 
-  # private 
   # def is_match(gram, tokens, bool)
   #   matching = gram.word
   #   rest = gram.history
