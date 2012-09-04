@@ -17,6 +17,10 @@ class Gram
   def history
     @gram.drop(1)
   end
+  def phrase
+    array =self.history << self.word
+    array.join(' ')
+  end
 end
 
 class Corpus
@@ -30,7 +34,7 @@ class Corpus
     @tokens.count(gram.word)
   end
   def count_gram(gram)
-    gram.gram.length #FIXME
+    @file_contents.scan(/#{gram.phrase}/).size
   end
 end
 
@@ -42,13 +46,11 @@ class Probablity
   end
  def simple_unsmoothed
    gram_count = @corpus.count_gram(@gram)
-   puts "The gram count is #{gram_count}."
    word_count = @corpus.count_word(@gram)
-   puts "The word count is #{word_count}."
    p = gram_count/word_count
    puts "The simple unsmoothed probablity for the #{@gram.n}-gram " +
-     "#{@gram.gram} in the corpus from #{@corpus.file} is #{p}." +
-     "That means there is a #{p*100}% chance that the word " +
+     "\"#{@gram.gram.join(' ')}\" in the corpus from #{@corpus.file} is" +
+     " #{p}. That means there is a #{p*100}% chance that the word " +
      "\"#{@gram.word}\" would follow the words \"#{@gram.history}\"."
   end
 end
