@@ -45,6 +45,8 @@ class Tokenizer
   def tokens(string)
     send(@tokenizer, string)
   end
+
+  private
   def basic_white_space(string)
     string.split(/\s+/)
   end
