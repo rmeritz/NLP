@@ -25,10 +25,10 @@ end
 
 class Corpus
   attr_reader :file
-  def initialize(file)
+  def initialize(file, tokenizer)
     @file = file
     @file_contents = File.read(@file)
-    @tokens = @file_contents.split(/\s+/)
+    @tokens = tokenizer.tokens(@file_contents)
   end
   def count_word(gram)
     @tokens.count(gram.word)
@@ -38,10 +38,24 @@ class Corpus
   end
 end
 
+class Tokenizer
+  def initialize(tokenizer)
+    @tokenizer = tokenizer.to_sym
+  end
+  def tokens(string)
+    send(@tokenizer, string)
+  end
+  def basic_white_space(string)
+    string.split(/\s+/)
+  end
+end
+
 class Probablity
   attr_reader :corpus, :gram
-  def initialize(source, gram)
-    @corpus = Corpus.new(source)
+  def initialize(tokenizer, source, gram)
+    @source = source
+    @tokenizer = Tokenizer.new(tokenizer)
+    @corpus = Corpus.new(@source, @tokenizer)
     @gram = Gram.new(gram)
   end
  def simple_unsmoothed
@@ -55,7 +69,8 @@ class Probablity
   end
 end
 
-input_file = ARGV[0]
-input_gram = ARGV[1..-1]
+input_tokenizer = ARGV[0]
+input_file = ARGV[1]
+input_gram = ARGV[2..-1]
 
-Probablity.new(input_file, input_gram).simple_unsmoothed
+Probablity.new(input_tokenizer, input_file, input_gram).simple_unsmoothed
