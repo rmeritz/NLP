@@ -34,11 +34,13 @@ class Corpus
     @tokens.count(gram.word)
   end
   def count_gram(gram)
-    @file_contents.scan(/#{gram.phrase}/).size
+    text = @tokens.join(' ')
+    text.scan(/#{gram.phrase}/).size
   end
 end
 
 class Tokenizer
+  attr_reader :tokenizer
   def initialize(tokenizer)
     @tokenizer = tokenizer.to_sym
   end
@@ -54,11 +56,9 @@ end
 
 class Probablity
   def initialize(tokenizer, source, gram)
-    puts 'iN new'
     @tokenizer = Tokenizer.new(tokenizer)
     @corpus = Corpus.new(source, @tokenizer)
-    puts gram
-    @gram = Gram.new(gram, @tokenizer)
+    @gram = Gram.new(gram)
   end
  def simple_unsmoothed
    gram_count = @corpus.count_gram(@gram)
