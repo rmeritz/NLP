@@ -53,22 +53,28 @@ class Tokenizer
 end
 
 class Probablity
-  attr_reader :corpus, :gram
   def initialize(tokenizer, source, gram)
-    @source = source
+    puts 'iN new'
     @tokenizer = Tokenizer.new(tokenizer)
-    @corpus = Corpus.new(@source, @tokenizer)
-    @gram = Gram.new(gram)
+    @corpus = Corpus.new(source, @tokenizer)
+    puts gram
+    @gram = Gram.new(gram, @tokenizer)
   end
  def simple_unsmoothed
    gram_count = @corpus.count_gram(@gram)
    word_count = @corpus.count_word(@gram)
    p = gram_count/word_count
-   puts "The simple unsmoothed probablity for the #{@gram.n}-gram " +
-     "\"#{@gram.gram.join(' ')}\" in the corpus from #{@corpus.file} is" +
+   pretty_print('simple unsmoothed', p)
+  end
+
+ private
+ def pretty_print(method, p)
+   puts "The #{method} probablity for the #{@gram.n}-gram " +
+     "\"#{@gram.gram.join(' ')}\" in the corpus from #{@corpus.file} " +
+     "parsed with the tokenizer #{@tokenizer.tokenizer} is" +
      " #{p}. That means there is a #{p*100}% chance that the word " +
      "\"#{@gram.word}\" would follow the words \"#{@gram.history}\"."
-  end
+ end
 end
 
 input_tokenizer = ARGV[0]
