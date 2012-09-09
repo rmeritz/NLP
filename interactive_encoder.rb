@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 class Interaction
   def initialize(argv, io, options)
     @callback_name = argv.first || options[:default]
@@ -88,7 +90,7 @@ class <<identity_callback
   end
 end
 
-interaction = Interaction.new(ARGV, io, default: 'identity')
+interaction = Interaction.new(ARGV, io, :default => 'identity')
 callbacks = CallbacksTable.new(io,
   'identity' => identity_callback, 'rot13' => Rot13Encoder.new)
 
