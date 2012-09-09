@@ -16,9 +16,8 @@ class Interaction
 end
 
 class CallbacksTable
-  def initialize(io, callbacks_table)
-    @io = io
-    @callbacks_table = build_callbacks_table(callbacks_table)
+  def initialize(default_obj, callbacks_table)
+    @callbacks_table = build_callbacks_table(callbacks_table, default_obj)
   end
 
   def run_on(callback_name, &block)
@@ -28,10 +27,10 @@ class CallbacksTable
 
   private
 
-  def build_callbacks_table(initial_table)
+  def build_callbacks_table(initial_table, default_obj)
     initial_table.clone.tap do |new_table|
       new_table.default_proc = lambda do |hash, key|
-        MissingCallback.new(@io, key)
+        default_obj.key=(key)
       end
     end
   end
@@ -56,9 +55,10 @@ class EncoderIO
 end
 
 class MissingCallback
-  def initialize(io, key)
+  attr_writer :key
+  def initialize(io)
     @io = io
-    @key = key
+    @key = nil
   end
 
   def run(&block)
@@ -91,7 +91,8 @@ class <<identity_callback
 end
 
 interaction = Interaction.new(ARGV, io, :default => 'identity')
-callbacks = CallbacksTable.new(io,
-  'identity' => identity_callback, 'rot13' => Rot13Encoder.new)
+callbacks = CallbacksTable.new(MissingCallback.new(io),
+                               'identity' => identity_callback,
+                               'rot13' => Rot13Encoder.new)
 
 interaction.run(callbacks)
