@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
 
 class Interaction
   def initialize(argv, io, options)
-    @callback_name = argv.first || options[:default]
-    @io = io
+    @callback_name = argv[0] || options[:default]
+    @io = io.set_lang(argv[1])
   end
 
   def run(callbacks_table)
@@ -37,8 +38,13 @@ class CallbacksTable
 end
 
 class EncoderIO
-  def prompt
-    $stdout.print "Enter the text: "
+  def initialize
+    @lang_encoder = self.default
+  end
+
+  def set_lang(lang)
+    @lang_encoder = self.langs[lang] || self.default
+    self
   end
 
   def gets(*a)
@@ -49,8 +55,42 @@ class EncoderIO
     $stdout.puts(*a)
   end
 
+  def prompt
+    $stdout.print @lang_encoder.enter_the_text + ": "
+  end
+
   def missing_callback(callback_name)
-    puts "No such encoder: #{callback_name}"
+    $stdout.puts @lang_encoder.no_such_encoder + ": #{callback_name}"
+  end
+
+  protected
+  def default
+    EnglishEncoderIO.new
+  end
+
+  def langs
+    {nil => self.default,
+      'english' => EnglishEncoderIO.new,
+      'swedish' => SwedishEncoderIO.new}
+  end
+
+end
+
+class EnglishEncoderIO
+  def enter_the_text
+    'Enter the text'
+  end
+  def no_such_encoder
+    'No such encoder'
+  end
+end
+
+class SwedishEncoderIO
+  def enter_the_text
+    "Ange texten"
+  end
+  def no_such_encoder
+    "Ingen sådan kodare"
   end
 end
 
