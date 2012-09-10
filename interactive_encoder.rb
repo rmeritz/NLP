@@ -31,7 +31,7 @@ class CallbacksTable
   def build_callbacks_table(initial_table, default_obj)
     initial_table.clone.tap do |new_table|
       new_table.default_proc = lambda do |hash, key|
-        default_obj.key(key)
+        default_obj.tap {|o| o.key=(key)}
       end
     end
   end
@@ -95,14 +95,10 @@ class SwedishEncoderIO
 end
 
 class MissingCallback
+  attr_writer :key
   def initialize(io)
     @io = io
     @key = nil
-  end
-
-  def key(key)
-    @key = key
-    self
   end
 
   def run(&block)
