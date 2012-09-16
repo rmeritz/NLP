@@ -1,10 +1,10 @@
 load 'interactive_encoder_classes.rb'
 require 'test/unit'
 
-# class InteractionTests < Test::Unit::TestCase
-#   def tests
-#   end
-# end
+class InteractionTests < Test::Unit::TestCase
+   def tests
+   end
+ end
 
 class CallbacksTableTests < Test::Unit::TestCase
   def tests
@@ -13,31 +13,37 @@ class CallbacksTableTests < Test::Unit::TestCase
   end
   
    def missing_callback_test
-     callbacks = callback(Hash.new)
+     callbacks = table(Hash.new)
      assert_equal(callbacks.run_on('Nonexistant Callback'),
                   'Ran on mock missing callback')
    end
 
    def working_callback_test
-     callbacks = callback('Working Callback' => MockCallback.new)
-     assert_equal(callbacks.run_on('Working Callback'),
+     callbacks = table('WorkingCallback' => MockCallback.new)
+     assert_equal(callbacks.run_on('WorkingCallback'),
                   'Ran on mock callback')
      assert_equal(callbacks.run_on('Nonexistant Callback'),
                   'Ran on mock missing callback')
    end
 
-   def callback(callbackhash)
-     defaultobj = MockMissingClassback.new()
-     callbacks = CallbacksTable.new(defaultobj, Hash.new)
+   def table(hash)
+     CallbacksTable.new(MockMissingClassback.new(), hash)
    end
 end
 
 class EncoderTests < Test::Unit::TestCase
+  def setup
+    @testword = 'TestWord'
+    @block = lambda {|encoder| encoder.call(@testword)}
+  end
+
   def tests
-    testword = 'TestWord'
-    block = lambda {|callback| callback.call(testword)}
-    assert_equal(Rot13Encoder.new.run(&block) , 'TrstWorq')
-    assert_not_equal(Rot13Encoder.new.run(&block) , testword)
+    rot13_tests
+  end
+
+  def rot13_tests
+    assert_equal(Rot13Encoder.new.run(&@block) , 'TrstWorq')
+    assert_not_equal(Rot13Encoder.new.run(&@block) , @testword)
   end
 end
 
