@@ -44,35 +44,49 @@ class EncoderTests < Test::Unit::TestCase
   end
 end
 
-# class MockCallbacksTable
-#   def initialize(default_obj, callbacks_table)# -*- coding: utf-8 -*-
+class InteractionTests  < Test::Unit::TestCase  
+  def test_new_interaction
+    callbacks_table = MockCallbacksTable.new
+    interaction('mock_callback').run(callbacks_table)
+    assert(callbacks_table.has_been_called_with?('mock_callback'))
+  end
+  def interaction(default)
+    Interaction.new([], MockEncoderIO.new(), :default => default)
+  end
+end
 
+class MockCallbacksTable
+  def initialize
+    @was_called_on = []
+  end
+  def run_on(callback_name, &block)
+    @was_called_on << callback_name 
+  end
+  def has_been_called_with?(callback_name)
+   @was_called_on.include?(callback_name)
+  end
+end
 
-#     @callbacks_table = build_callbacks_table(callbacks_table, default_obj)
-#   end
-#  def run_on(callback_name, &block)
-#     callback = @callbacks_table[callback_name]
-#     callback.run(&block)
-#   end
-# end
-
-# class MockEncoderIO
-#   def set_lang(lang)
-#     self
-#   end
-#   def gets(*a)
-#     'TestWord'
-#   end
-#   def puts(*a)
-#   end
-#   def prompt
-#   end
-# end
+class MockEncoderIO
+  def set_lang(lang)
+    self
+  end
+  def gets(*a)
+    'TestWord'
+  end
+  def puts(*a)
+  end
+  def prompt
+  end
+end
 
 class MockCallback
   attr_writer :key
   def run(&block)
     'Ran on mock callback'
+  end
+  def call(thing)
+    "Called #{thing}"
   end
 end
 
