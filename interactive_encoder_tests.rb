@@ -44,23 +44,43 @@ class EncoderTests < Test::Unit::TestCase
   end
 end
 
-class InteractionTests  < Test::Unit::TestCase  
+class InteractionTests < Test::Unit::TestCase  
   def test_new_interaction
-    callbacks_table = MockCallbacksTable.new
-    interaction('mock_callback').run(callbacks_table)
+    callbacks_table = MockCallbacksTable.new(MockCallback.new)
+    io = MockEncoderIO.new('TestWord')
+
+    interaction(io, 'mock_callback').run(callbacks_table)
+
     assert(callbacks_table.has_been_called_with?('mock_callback'))
+    assert(io.call_list_is?(:set_lang, :prompt, :gets, :puts),
+           "Instead called #{io.call_list}")
+    assert(io.has_put?('Called TestWord'), "Actually put #{io.has_put}")
   end
-  def interaction(default)
-    Interaction.new([], MockEncoderIO.new(), :default => default)
+  def test_interaction_using_argv
+    argv = %w(user_encoding user_lang)
+    io = MockEncoderIO.new
+    callbacks_table = MockCallbacksTable.new(MockCallback.new)
+
+    Interaction.new(argv, io, :default => '').run(callbacks_table)
+    
+    assert(callbacks_table.has_been_called_with?('user_encoding'),
+           "The real callback is #{callbacks_table.was_called_on}")
+    assert(io.has_lang?('user_lang'))
+  end
+  def interaction(io, default)
+    Interaction.new([], io, :default => default)
   end
 end
 
 class MockCallbacksTable
-  def initialize
+  attr_reader :was_called_on
+  def initialize(callback)
     @was_called_on = []
+    @callback = callback
   end
   def run_on(callback_name, &block)
-    @was_called_on << callback_name 
+    @was_called_on << callback_name
+    block.call(@callback)
   end
   def has_been_called_with?(callback_name)
    @was_called_on.include?(callback_name)
@@ -68,15 +88,35 @@ class MockCallbacksTable
 end
 
 class MockEncoderIO
+  attr_reader :call_list, :has_put
+  def initialize(word='default_word')
+    @word = word
+    @call_list = []
+  end
   def set_lang(lang)
+    @call_list << :set_lang
+    @lang = lang
     self
   end
-  def gets(*a)
-    'TestWord'
+  def gets
+    @call_list << :gets
+    @word
   end
-  def puts(*a)
+  def puts(a)
+    @call_list << :puts
+    @has_put = a
   end
   def prompt
+    @call_list << :prompt
+  end
+  def call_list_is?(*call_list)
+    @call_list == call_list
+  end
+  def has_put?(x)
+    x == @has_put
+  end
+  def has_lang?(lang)
+    lang == @lang
   end
 end
 

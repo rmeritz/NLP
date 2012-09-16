@@ -46,8 +46,8 @@ class EncoderIO
     self
   end
 
-  def gets(*a)
-    $stdin.gets(*a)
+  def gets
+    $stdin.gets
   end
 
   def puts(*a)
