@@ -6,15 +6,33 @@ require 'test/unit'
 #   end
 # end
 
-# class InteractionTests < Test::Unit::TestCase
-#   def tests
-#   end
-# end
+class CallbacksTableTests < Test::Unit::TestCase
+  def tests
+    missing_callback_test
+    working_callback_test
+  end
+  
+   def missing_callback_test
+     callbacks = callback(Hash.new)
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
 
-testword = 'TestWord'
-block = lambda {|callback| callback.call(testword)}
+   def working_callback_test
+     callbacks = callback('Working Callback' => MockCallback.new)
+     assert_equal(callbacks.run_on('Working Callback'),
+                  'Ran on mock callback')
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
 
-class EncoderTest < Test::Unit::TestCase
+   def callback(callbackhash)
+     defaultobj = MockMissingClassback.new()
+     callbacks = CallbacksTable.new(defaultobj, Hash.new)
+   end
+end
+
+class EncoderTests < Test::Unit::TestCase
   def tests
     testword = 'TestWord'
     block = lambda {|callback| callback.call(testword)}
@@ -47,3 +65,17 @@ end
 #   def prompt
 #   end
 # end
+
+class MockCallback
+  attr_writer :key
+  def run(&block)
+    'Ran on mock callback'
+  end
+end
+
+class MockMissingClassback
+  attr_writer :key
+  def run(&block)
+    'Ran on mock missing callback'
+  end
+end
