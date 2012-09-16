@@ -44,32 +44,32 @@ class EncoderTests < Test::Unit::TestCase
   end
 end
 
-class InteractionTests < Test::Unit::TestCase  
+class InteractionTests < Test::Unit::TestCase
+  def setup
+    @callbacks_table = MockCallbacksTable.new(MockCallback.new)
+    @io = MockEncoderIO.new('TestWord')
+  end
+  
   def test_new_interaction
-    callbacks_table = MockCallbacksTable.new(MockCallback.new)
-    io = MockEncoderIO.new('TestWord')
+    Interaction.new([], @io, default: 'mock_callback').
+      run(@callbacks_table)
 
-    interaction(io, 'mock_callback').run(callbacks_table)
-
-    assert(callbacks_table.has_been_called_with?('mock_callback'))
-    assert(io.call_list_is?(:set_lang, :prompt, :gets, :puts),
-           "Instead called #{io.call_list}")
-    assert(io.has_put?('Called TestWord'), "Actually put #{io.has_put}")
+    assert(@callbacks_table.has_been_called_with?('mock_callback'))
+    assert(@io.call_list_is?(:set_lang, :prompt, :gets, :puts),
+           "Instead called #{@io.call_list}")
+    assert(@io.has_put?('Called TestWord'),
+           "Actually put #{@io.has_put}")
   end
   def test_interaction_using_argv
     argv = %w(user_encoding user_lang)
-    io = MockEncoderIO.new
-    callbacks_table = MockCallbacksTable.new(MockCallback.new)
 
-    Interaction.new(argv, io, :default => '').run(callbacks_table)
+    Interaction.new(argv, @io, :default => '').run(@callbacks_table)
     
-    assert(callbacks_table.has_been_called_with?('user_encoding'),
-           "The real callback is #{callbacks_table.was_called_on}")
-    assert(io.has_lang?('user_lang'))
+    assert(@callbacks_table.has_been_called_with?('user_encoding'),
+           "The real callback is #{@callbacks_table.was_called_on}")
+    assert(@io.has_lang?('user_lang'))
   end
-  def interaction(io, default)
-    Interaction.new([], io, :default => default)
-  end
+
 end
 
 class MockCallbacksTable
