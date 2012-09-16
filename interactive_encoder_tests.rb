@@ -1,24 +1,25 @@
 load 'interactive_encoder_classes.rb'
 require 'test/unit'
 
-class InteractionTests < Test::Unit::TestCase
+class LangEncoderTests < Test::Unit::TestCase
    def tests
+     all_translation_available(EnglishEncoderIO.new())
+     all_translation_available(SwedishEncoderIO.new())
+   end
+   def all_translation_available(test_class)
+     assert_equal(test_class.enter_the_text.class, String)
+     assert_equal(test_class.no_such_encoder.class, String)
    end
  end
 
 class CallbacksTableTests < Test::Unit::TestCase
-  def tests
-    missing_callback_test
-    working_callback_test
-  end
-  
-   def missing_callback_test
+   def test_missing_callback
      callbacks = table(Hash.new)
      assert_equal(callbacks.run_on('Nonexistant Callback'),
                   'Ran on mock missing callback')
    end
 
-   def working_callback_test
+   def test_working_callback
      callbacks = table('WorkingCallback' => MockCallback.new)
      assert_equal(callbacks.run_on('WorkingCallback'),
                   'Ran on mock callback')
@@ -37,11 +38,7 @@ class EncoderTests < Test::Unit::TestCase
     @block = lambda {|encoder| encoder.call(@testword)}
   end
 
-  def tests
-    rot13_tests
-  end
-
-  def rot13_tests
+  def test_rot13
     assert_equal(Rot13Encoder.new.run(&@block) , 'TrstWorq')
     assert_not_equal(Rot13Encoder.new.run(&@block) , @testword)
   end
