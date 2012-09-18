@@ -37,8 +37,11 @@ class CallbacksTable
 end
 
 class EncoderIO
-  def initialize
+  attr_reader :lang_encoder
+  def initialize(stdin, stdout)
     @lang_encoder = self.default
+    @stdin = stdin
+    @stdout = stdout
   end
 
   def set_lang(lang)
@@ -47,19 +50,19 @@ class EncoderIO
   end
 
   def gets
-    $stdin.gets
+    @stdin.gets
   end
 
   def puts(*a)
-    $stdout.puts(*a)
+    @stdout.puts(*a)
   end
 
   def prompt
-    $stdout.print @lang_encoder.enter_the_text + ": "
+    @stdout.print @lang_encoder.enter_the_text + ": "
   end
 
   def missing_callback(callback_name)
-    $stdout.puts @lang_encoder.no_such_encoder + ": #{callback_name}"
+    @stdout.puts @lang_encoder.no_such_encoder + ": #{callback_name}"
   end
 
   protected

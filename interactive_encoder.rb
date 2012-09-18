@@ -2,7 +2,7 @@
 load 'interactive_encoder_classes.rb'
 # Main:
 
-io = EncoderIO.new
+io = EncoderIO.new($stdin, $stdout)
 
 identity_callback = lambda { |x| x }
 class <<identity_callback

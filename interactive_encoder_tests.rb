@@ -1,14 +1,90 @@
 load 'interactive_encoder_classes.rb'
 require 'test/unit'
 
+class EncoderIOTests < Test::Unit::TestCase
+  def tests
+    e = EncoderIO.new(MockStdIO.new('g'), MockStdIO.new('g'))
+    assert_equal(e.prompt, 'Enter the text: ')
+    assert_equal(e.missing_callback('x'), 'No such encoder: x')
+    assert_equal(e.gets, 'g')
+    assert_equal(e.puts('s'), 's')
+    assert_equal(e.lang_encoder.class, EnglishEncoderIO)
+    assert_equal(e.set_lang('english').lang_encoder.class,
+                 EnglishEncoderIO)
+    assert_equal(e.set_lang('swedish').lang_encoder.class,
+                 SwedishEncoderIO)
+    assert_equal(e.set_lang('unsupported lang').lang_encoder.class,
+                 EnglishEncoderIO)
+  end
+end
+
 class LangEncoderTests < Test::Unit::TestCase
-   def tests
-     all_translation_available(EnglishEncoderIO.new())
-     all_translation_available(SwedishEncoderIO.new())
+  def test_interface
+     [EnglishEncoderIO, SwedishEncoderIO].each do |klass|
+       k = klass.new()
+       assert_respond_to(k, :enter_the_text)
+       assert_respond_to(k, :no_such_encoder)
+     end
    end
-   def all_translation_available(test_class)
-     assert_equal(test_class.enter_the_text.class, String)
-     assert_equal(test_class.no_such_encoder.class, String)
+ end
+
+class CallbacksTableTests < Test::Unit::TestCase
+   def test_missing_callback
+     callbacks = table(Hash.new)
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
+
+   def test_working_callback
+     callbacks = table('WorkingCallback' => MockCallback.new)
+     assert_equal(callbacks.run_on('WorkingCallback'),
+                  'Ran on mock callback')
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
+
+   def table(hash)
+     CallbacksTable.new(MockMissingClassback.new(), hash)
+   end
+end
+
+class LangEncoderTests < Test::Unit::TestCase
+  def test_interface
+     [EnglishEncoderIO, SwedishEncoderIO].each do |klass|
+       k = klass.new()
+       assert_respond_to(k, :enter_the_text)
+       assert_respond_to(k, :no_such_encoder)
+     end
+   end
+ end
+
+class CallbacksTableTests < Test::Unit::TestCase
+   def test_missing_callback
+     callbacks = table(Hash.new)
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
+
+   def test_working_callback
+     callbacks = table('WorkingCallback' => MockCallback.new)
+     assert_equal(callbacks.run_on('WorkingCallback'),
+                  'Ran on mock callback')
+     assert_equal(callbacks.run_on('Nonexistant Callback'),
+                  'Ran on mock missing callback')
+   end
+
+   def table(hash)
+     CallbacksTable.new(MockMissingClassback.new(), hash)
+   end
+end
+
+class LangEncoderTests < Test::Unit::TestCase
+  def test_interface
+     [EnglishEncoderIO, SwedishEncoderIO].each do |klass|
+       k = klass.new()
+       assert_respond_to(k, :enter_the_text)
+       assert_respond_to(k, :no_such_encoder)
+     end
    end
  end
 
@@ -121,7 +197,6 @@ class MockEncoderIO
 end
 
 class MockCallback
-  attr_writer :key
   def run(&block)
     'Ran on mock callback'
   end
@@ -134,5 +209,20 @@ class MockMissingClassback
   attr_writer :key
   def run(&block)
     'Ran on mock missing callback'
+  end
+end
+
+class MockStdIO
+  def initialize(gotten)
+    @gotten = gotten
+  end
+  def gets
+    @gotten
+  end
+  def puts(thing)
+    thing
+  end
+  def print(string)
+    string
   end
 end
