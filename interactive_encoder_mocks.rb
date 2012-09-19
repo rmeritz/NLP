@@ -1,49 +1,15 @@
-class MockCallbacksTable
-  attr_reader :was_called_on
-  def initialize(callback)
-    @was_called_on = []
-    @callback = callback
+class MockEncoderIO
+  attr_writer :key
+  def gets
   end
-  def run_on(callback_name, &block)
-    @was_called_on << callback_name
-    block.call(@callback)
+  def puts(a)
   end
-  def has_been_called_with?(callback_name)
-   @was_called_on.include?(callback_name)
+  def prompt
   end
 end
 
-class MockEncoderIO
-  attr_reader :call_list, :has_put
-  def initialize(word='default_word')
-    @word = word
-    @call_list = []
-  end
-  def set_lang(lang)
-    @call_list << :set_lang
-    @lang = lang
-    self
-  end
-  def gets
-    @call_list << :gets
-    @word
-  end
-  def puts(a)
-    @call_list << :puts
-    @has_put = a
-  end
-  def prompt
-    @call_list << :prompt
-  end
-  def call_list_is?(*call_list)
-    @call_list == call_list
-  end
-  def has_put?(x)
-    x == @has_put
-  end
-  def has_lang?(lang)
-    lang == @lang
-  end
+class MockDefaultCallback
+  attr_writer :key
 end
 
 class MockCallback
@@ -52,13 +18,6 @@ class MockCallback
   end
   def call(thing)
     "Called #{thing}"
-  end
-end
-
-class MockMissingClassback
-  attr_writer :key
-  def run(&block)
-    'Ran on mock missing callback'
   end
 end
 
