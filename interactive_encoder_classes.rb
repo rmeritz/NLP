@@ -1,32 +1,30 @@
 # -*- coding: utf-8 -*-
 
-class Interaction
-  def initialize(argv, io, options)
-    @callback_name = argv[0] || options[:default]
-    @io = io.set_lang(argv[1])
+class EncoderInteraction
+  def initialize(argv, io_callbacks_table)
+    @callback_name = argv[0] || 'identity'
+    @io_obj = io_callbacks_table.object(argv[1])
   end
-
-  def run(callbacks_table)
-    callbacks_table.run_on(@callback_name) do |callback|
-      @io.prompt
-      input = @io.gets
-      @io.puts(callback.call(input))
+  def run(encodings_hash)
+    default_encoding_obj = MissingEncoder.new(@io_obj)
+    encodings_table = CallbacksTable.new(default_encoding_obj,
+                                         encodings_hash)
+    encodings_table.object(@callback_name).run do |callback|
+      @io_obj.prompt
+      input = @io_obj.gets
+      @io_obj.puts(callback.call(input))
     end
   end
 end
 
 class CallbacksTable
-  def initialize(default_obj, callbacks_table)
-    @callbacks_table = build_callbacks_table(callbacks_table, default_obj)
+  def initialize(default_obj, hash)
+    @callbacks_table = build_callbacks_table(hash, default_obj)
   end
-
-  def run_on(callback_name, &block)
+  def object(callback_name)
     callback = @callbacks_table[callback_name]
-    callback.run(&block)
   end
-
   private
-
   def build_callbacks_table(initial_table, default_obj)
     initial_table.clone.tap do |new_table|
       new_table.default_proc = lambda do |hash, key|
@@ -37,48 +35,26 @@ class CallbacksTable
 end
 
 class EncoderIO
-  attr_reader :lang_encoder
   def initialize(stdin, stdout)
-    @lang_encoder = self.default
     @stdin = stdin
     @stdout = stdout
   end
-
-  def set_lang(lang)
-    @lang_encoder = self.langs[lang] || self.default
-    self
-  end
-
   def gets
     @stdin.gets
   end
-
   def puts(*a)
     @stdout.puts(*a)
   end
-
   def prompt
-    @stdout.print @lang_encoder.enter_the_text + ": "
+    @stdout.print enter_the_text + ": "
   end
-
   def missing_callback(callback_name)
-    @stdout.puts @lang_encoder.no_such_encoder + ": #{callback_name}"
+    @stdout.puts no_such_encoder + ": #{callback_name}"
   end
-
-  protected
-  def default
-    EnglishEncoderIO.new
-  end
-
-  def langs
-    {nil => self.default,
-      'english' => EnglishEncoderIO.new,
-      'swedish' => SwedishEncoderIO.new}
-  end
-
 end
 
-class EnglishEncoderIO
+class EnglishEncoderIO < EncoderIO
+  attr_writer :key
   def enter_the_text
     'Enter the text'
   end
@@ -87,7 +63,7 @@ class EnglishEncoderIO
   end
 end
 
-class SwedishEncoderIO
+class SwedishEncoderIO < EncoderIO
   def enter_the_text
     "Ange texten"
   end
@@ -96,17 +72,15 @@ class SwedishEncoderIO
   end
 end
 
-class MissingCallback
+class MissingEncoder
   attr_writer :key
   def initialize(io)
     @io = io
     @key = nil
   end
-
   def run(&block)
     @io.missing_callback(@key)
   end
-
   def call
   end
 end
@@ -115,7 +89,6 @@ class Rot13Encoder
   def run(&block)
     block.call(self)
   end
-
   def call(string)
     string.tr('a-m', 'n-z')
   end

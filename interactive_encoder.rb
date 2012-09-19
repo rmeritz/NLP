@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
 load 'interactive_encoder_classes.rb'
-# Main:
-
-io = EncoderIO.new($stdin, $stdout)
 
 identity_callback = lambda { |x| x }
 class <<identity_callback
@@ -11,9 +8,19 @@ class <<identity_callback
   end
 end
 
-interaction = Interaction.new(ARGV, io, :default => 'identity')
-callbacks = CallbacksTable.new(MissingCallback.new(io),
-                               'identity' => identity_callback,
-                               'rot13' => Rot13Encoder.new)
+def new_io(klass)
+  klass.new($stdin, $stdout)
+end
 
-interaction.run(callbacks)
+english_io = new_io(EnglishEncoderIO)
+
+languages = {'english' => english_io,
+  'swedish' => new_io(SwedishEncoderIO)}
+
+io_callbacks_table = CallbacksTable.new(english_io, languages)
+
+interaction = EncoderInteraction.new(ARGV, io_callbacks_table)
+
+interaction.run({'identity' => identity_callback,
+                  'rot13' => Rot13Encoder.new})
+                
