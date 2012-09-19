@@ -23,4 +23,3 @@ interaction = EncoderInteraction.new(ARGV, io_callbacks_table)
 
 interaction.run({'identity' => identity_callback,
                   'rot13' => Rot13Encoder.new})
-                

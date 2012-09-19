@@ -35,6 +35,7 @@ class CallbacksTable
 end
 
 class EncoderIO
+  attr_writer :key #Need by default language as called by callback table
   def initialize(stdin, stdout)
     @stdin = stdin
     @stdout = stdout
@@ -54,7 +55,6 @@ class EncoderIO
 end
 
 class EnglishEncoderIO < EncoderIO
-  attr_writer :key
   def enter_the_text
     'Enter the text'
   end
