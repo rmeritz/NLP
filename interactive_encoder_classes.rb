@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 class EncoderInteraction
-  def initialize(argv, io_callbacks_table)
+  attr_reader :io_obj
+  def initialize(argv, io_callbacks)
     @callback_name = argv[0] || 'identity'
-    @io_obj = io_callbacks_table.object(argv[1])
+    @io_obj = io_callbacks.object(argv[1])
   end
-  def run(encodings_hash)
-    default_encoding_obj = MissingEncoder.new(@io_obj)
-    encodings_table = CallbacksTable.new(default_encoding_obj,
-                                         encodings_hash)
-    encodings_table.object(@callback_name).run do |callback|
+  def run(encodings_callbacks)
+    encodings_callbacks.object(@callback_name).run do |callback|
       @io_obj.prompt
       input = @io_obj.gets
       @io_obj.puts(callback.call(input))

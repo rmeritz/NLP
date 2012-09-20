@@ -8,18 +8,12 @@ class <<identity_callback
   end
 end
 
-def new_io(klass)
-  klass.new($stdin, $stdout)
-end
+io_callbacks = CallbacksTable.new(EnglishEncoderIO.new($stdin, $stdout),
+                                  'swedish' =>
+                                  SwedishEncoderIO.new($stdin, $stdout))
 
-english_io = new_io(EnglishEncoderIO)
+i = EncoderInteraction.new(ARGV, io_callbacks)
 
-languages = {'english' => english_io,
-  'swedish' => new_io(SwedishEncoderIO)}
-
-io_callbacks_table = CallbacksTable.new(english_io, languages)
-
-interaction = EncoderInteraction.new(ARGV, io_callbacks_table)
-
-interaction.run({'identity' => identity_callback,
-                  'rot13' => Rot13Encoder.new})
+i.run(CallbacksTable.new(MissingEncoder.new(i.io_obj),
+                        'identity' => identity_callback,
+                        'rot13' => Rot13Encoder.new))
