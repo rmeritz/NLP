@@ -60,30 +60,34 @@ class EncoderTests < Test::Unit::TestCase
   end
 end
 
-## This test is much less powerful that before...
-## CallbackTable clones our mock objects before using the so they are
-## not accessable. Need to change EncoderInteraction so take mock
-## callback table so can avoid this behavoir and objects can 
-## be more directly examined.
 class EncoderInteractionTests < Test::Unit::TestCase
   def setup
-    @selected_encoder_name = 'mock_callback'
-    @encoder_hash = {@selected_encoder_name => MockCallback.new}
-    io = MockEncoderIO.new
-    @io_selected_name = 'lang'
-    @io_table = CallbacksTable.new(io, {@io_selected_name => io})
+    @io = MockEncoderIO.new('TestWord')
+    @io_callbacks = MockCallbacksTable.new(@io)
+    @encoder = MockCallback.new
+    @encoder_callbacks = MockCallbacksTable.new(@encoder)
   end
-  
-  def tests
-    assert_mock_encoder_callback_is_called([@selected_encoder_name])
-    assert_mock_encoder_callback_is_called([@selected_encoder_name,
-                                            @io_selected_name])
+  def test_with_argv
+    i = EncoderInteraction.new(%w(user_encoding user_lang), @io_callbacks)
+    assert(@io_callbacks.was_called_with?('user_lang'),
+           "Was actually called with #{@io_callbacks.callback_name}")
+    i.run(@encoder_callbacks)
+    assert(@encoder_callbacks.was_called_with?('user_encoding'),
+           "Was actually called with #{@encoder_callbacks.callback_name}")
   end
-  
-  def assert_mock_encoder_callback_is_called(argv)
-    assert_equal('Ran on mock callback', interaction(argv))
+  def test_without_argv
+    i = EncoderInteraction.new([], @io_callbacks)
+    assert(@io_callbacks.was_called_with?(nil),
+           "Was actually called with #{@io_callbacks.callback_name}")
+    i.run(@encoder_callbacks)
+    assert(@encoder_callbacks.was_called_with?('identity'),
+           "Was actually called with #{@encoder_callbacks.callback_name}")
   end
-  def interaction(argv)
-    EncoderInteraction.new(argv, @io_table).run(@encoder_hash)
+  def test_run
+    i = EncoderInteraction.new([], @io_callbacks).run(@encoder_callbacks)
+    assert(@io.call_list_is?(:prompt, :gets, :puts),
+           "Instead called #{@io.call_list}")
+    assert(@io.has_put?('Called TestWord'),
+           "Actually put #{@io.has_put}")
   end
 end
