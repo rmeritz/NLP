@@ -1,7 +1,6 @@
-load 'interactive_encoder_classes.rb'
-load 'interactive_encoder_mocks.rb'
+require_relative '../lib/interactive_encoder_classes.rb'
+require_relative 'interactive_encoder_mocks.rb'
 require 'test/unit'
-require 'bourne'
 
 class LangaugeEncoderIOTests < Test::Unit::TestCase
   def test_language_encoder_interface

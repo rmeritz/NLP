@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-load 'interactive_encoder_classes.rb'
+require_relative '../lib/interactive_encoder_classes.rb'
 
 identity_callback = lambda { |x| x }
 class <<identity_callback
